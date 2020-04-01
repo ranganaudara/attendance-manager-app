@@ -1,11 +1,14 @@
+import 'package:attendancemanagerapp/services/auth.dart';
 import 'package:attendancemanagerapp/src/screens/choose_role.dart';
 import 'package:attendancemanagerapp/src/screens/student_dashboard.dart';
 import 'package:attendancemanagerapp/src/screens/student_login.dart';
 import 'package:attendancemanagerapp/src/screens/teacher_dashboard.dart';
 import 'package:attendancemanagerapp/src/screens/teacher_login.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'models/user.dart';
 
-class App extends StatelessWidget {
+class Wrapper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

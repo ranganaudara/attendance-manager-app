@@ -1,6 +1,10 @@
 import 'package:attendancemanagerapp/config/size_config.dart';
+import 'package:attendancemanagerapp/src/models/user.dart';
+import 'package:attendancemanagerapp/src/screens/student_dashboard.dart';
+import 'package:attendancemanagerapp/src/screens/student_login.dart';
 import 'package:attendancemanagerapp/src/widgets/square_button.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class ChooseRoleView extends StatefulWidget {
   @override
@@ -10,6 +14,9 @@ class ChooseRoleView extends StatefulWidget {
 class _ChooseRoleViewState extends State<ChooseRoleView> {
   @override
   Widget build(BuildContext context) {
+
+    final user = Provider.of<User>(context);
+
     SizeConfig().init(context);
 
     return Scaffold(
@@ -29,7 +36,12 @@ class _ChooseRoleViewState extends State<ChooseRoleView> {
               SizedBox(height: SizeConfig.blockSizeVertical * 5),
               SquareButton(
                   title: 'Teacher', onPressed: () {
-                Navigator.of(context).pushNamed('/teacher_login');
+                if(user == null){
+                  Navigator.of(context).pushNamed('/teacher_login');
+                } else {
+                  Navigator.of(context).pushNamed('/teacher_dashboard');
+                }
+
               }, icon: Icons.school),
               SizedBox(height: SizeConfig.blockSizeVertical * 5)
             ],
