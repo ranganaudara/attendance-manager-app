@@ -8,6 +8,7 @@ class TextButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FlatButton(
+      padding: EdgeInsets.symmetric(horizontal: 5),
       textColor: Theme.of(context).primaryColor,
       disabledTextColor: Theme.of(context).disabledColor,
       splashColor: Theme.of(context).accentColor,

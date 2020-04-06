@@ -5,12 +5,12 @@ import 'package:attendancemanagerapp/src/widgets/submit_button.dart';
 import 'package:attendancemanagerapp/src/widgets/text_button.dart';
 import 'package:flutter/material.dart';
 
-class StudentLoginView extends StatefulWidget {
+class StudentLoginScreen extends StatefulWidget {
   @override
-  _StudentLoginViewState createState() => _StudentLoginViewState();
+  _StudentLoginScreenState createState() => _StudentLoginScreenState();
 }
 
-class _StudentLoginViewState extends State<StudentLoginView> {
+class _StudentLoginScreenState extends State<StudentLoginScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   String _email, _password;
   final _passwordFieldKey = GlobalKey<FormFieldState<String>>();
@@ -38,6 +38,7 @@ class _StudentLoginViewState extends State<StudentLoginView> {
                   TextInputField(
                     isPassword: false,
                     labelText: 'Email',
+                    keyboardType: TextInputType.emailAddress,
                     onSaved: (input) => _email = input,
                     validator: (input) {
                       if (input.isEmpty) {
