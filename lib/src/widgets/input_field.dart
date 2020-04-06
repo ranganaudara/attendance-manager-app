@@ -10,6 +10,7 @@ class TextInputField extends StatefulWidget {
     this.validator,
     this.onFieldSubmitted,
     this.isPassword,
+    this.keyboardType
   });
 
   final Key fieldKey;
@@ -20,6 +21,7 @@ class TextInputField extends StatefulWidget {
   final FormFieldValidator<String> validator;
   final ValueChanged<String> onFieldSubmitted;
   final bool isPassword;
+  final TextInputType keyboardType;
 
   @override
   _TextInputFieldState createState() => _TextInputFieldState();
@@ -32,12 +34,12 @@ class _TextInputFieldState extends State<TextInputField> {
   Widget build(BuildContext context) {
     return TextFormField(
       key: widget.fieldKey,
-      obscureText: _obscureText,
-//      maxLength:
-//          widget.maxLength ?? 8, // if not provided by the user, then it is 8
+      autofocus: false,
+      obscureText: widget.isPassword?_obscureText:false,
       onSaved: widget.onSaved,
       validator: widget.validator,
       onFieldSubmitted: widget.onFieldSubmitted,
+      keyboardType: widget.keyboardType,
       decoration: InputDecoration(
         border: OutlineInputBorder(
           borderRadius: const BorderRadius.all(Radius.circular(20.0)),

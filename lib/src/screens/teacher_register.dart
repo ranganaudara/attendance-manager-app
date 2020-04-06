@@ -1,5 +1,6 @@
 import 'package:attendancemanagerapp/config/size_config.dart';
 import 'package:attendancemanagerapp/services/auth.dart';
+import 'package:attendancemanagerapp/src/mixins/validator_mixin.dart';
 import 'package:attendancemanagerapp/src/widgets/input_field.dart';
 import 'package:attendancemanagerapp/src/widgets/loading.dart';
 import 'package:attendancemanagerapp/src/widgets/logo_thumb.dart';
@@ -7,18 +8,18 @@ import 'package:attendancemanagerapp/src/widgets/submit_button.dart';
 import 'package:attendancemanagerapp/src/widgets/text_button.dart';
 import 'package:flutter/material.dart';
 
-class TeacherLoginScreen extends StatefulWidget {
+class TeacherRegisterScreen extends StatefulWidget {
   @override
-  _TeacherLoginScreenState createState() => _TeacherLoginScreenState();
+  _TeacherRegisterScreenState createState() => _TeacherRegisterScreenState();
 }
 
-class _TeacherLoginScreenState extends State<TeacherLoginScreen> {
+class _TeacherRegisterScreenState extends State<TeacherRegisterScreen>
+    with ValidatorMixin {
   final AuthService _auth = AuthService();
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  String _email, _password, err;
-//  bool isLoading = false;
+  String _firstName, _lastName, _email, _subject, _password, err = '';
   final _passwordFieldKey = GlobalKey<FormFieldState<String>>();
 
   @override
@@ -34,25 +35,61 @@ class _TeacherLoginScreenState extends State<TeacherLoginScreen> {
             key: _formKey,
             child: Column(
               children: <Widget>[
-                SizedBox(height: SizeConfig.screenHeight * 0.17),
+                SizedBox(height: SizeConfig.screenHeight * 0.1),
                 LogoThumb('assets/images/teacher_login.png'),
                 SizedBox(height: SizeConfig.blockSizeVertical * 3),
                 Text(
-                  'Sign in as Teacher',
+                  'Teacher Registration',
                   style: Theme.of(context).textTheme.title,
                 ),
                 SizedBox(height: SizeConfig.blockSizeVertical * 5),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Expanded(
+                      flex: 1,
+                      child: TextInputField(
+                        isPassword: false,
+                        labelText: 'First Name',
+                        onSaved: (input) => _firstName = input,
+                        validator: (input) {
+                          if (input.isEmpty) {
+                            return 'Enter first name!';
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+                    SizedBox(width: SizeConfig.blockSizeVertical * 3),
+                    Expanded(
+                      flex: 1,
+                      child: TextInputField(
+                        isPassword: false,
+                        labelText: 'Last Name',
+                        onSaved: (input) => _lastName = input,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: SizeConfig.blockSizeVertical * 3),
+                TextInputField(
+                  isPassword: false,
+                  labelText: 'Subject',
+                  onSaved: (input) => _subject = input,
+                  validator: (input) {
+                    if (input.isEmpty) {
+                      return 'Subject cannot be empty!';
+                    }
+                    return null;
+                  },
+                ),
+                SizedBox(height: SizeConfig.blockSizeVertical * 3),
                 TextInputField(
                   isPassword: false,
                   labelText: 'Email',
                   keyboardType: TextInputType.emailAddress,
                   onSaved: (input) => _email = input,
-                  validator: (input) {
-                    if (input.isEmpty) {
-                      return 'Provide an email';
-                    }
-                    return null;
-                  },
+                  validator: emailValidator,
                 ),
                 SizedBox(height: SizeConfig.blockSizeVertical * 3),
                 TextInputField(
@@ -60,45 +97,29 @@ class _TeacherLoginScreenState extends State<TeacherLoginScreen> {
                   fieldKey: _passwordFieldKey,
                   labelText: 'Password',
                   onSaved: (input) => _password = input,
-                  validator: (input) {
-                    if (input.isEmpty) {
-                      return 'Provide an password';
-                    }
-                    return null;
-                  },
+                  validator: passwordValidator,
                 ),
                 SizedBox(height: SizeConfig.blockSizeVertical * 3),
                 SubmitButton(
-                  title: 'Sign in',
-                  onSubmit: signIn,
+                  title: 'Register',
+                  onSubmit: signUp,
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     SizedBox(width: SizeConfig.blockSizeHorizontal * 5),
                     Text(
-                      "Don't have an Account?",
+                      "Already registered?",
                       style: Theme.of(context).textTheme.body2,
                     ),
                     TextButton(
-                      title: 'Register',
+                      title: 'Sign in',
                       onSubmit: () {
-                        Navigator.popAndPushNamed(context, '/teacher_register');
+                        Navigator.of(context).pushNamedAndRemoveUntil(
+                            '/teacher_login', (Route<dynamic> route) => false);
                       },
                     ),
                   ],
-                ),
-//                SizedBox(height: SizeConfig.blockSizeVertical),
-                Text(
-                  'Are you a student?',
-                  style: Theme.of(context).textTheme.body2,
-                ),
-                TextButton(
-                  title: 'click here',
-                  onSubmit: () {
-                    Navigator.of(context).pushNamedAndRemoveUntil(
-                        '/choose_role', (Route<dynamic> route) => false);
-                  },
                 ),
               ],
             ),
@@ -126,7 +147,8 @@ class _TeacherLoginScreenState extends State<TeacherLoginScreen> {
     );
     _scaffoldKey.currentState.showSnackBar(snackBar);
   }
-  void signIn() async {
+
+  void signUp() async {
     if (_formKey.currentState.validate()) {
       _formKey.currentState.save();
       showDialog(
@@ -134,23 +156,21 @@ class _TeacherLoginScreenState extends State<TeacherLoginScreen> {
           builder: (BuildContext context) {
             return Loading();
           });
-      try {
-        dynamic result = await _auth.signInWithEmailAndPassword(
-            _email, _password);
-        if (result == null) {
-          Navigator.pop(context);
-          invalidAuth('Error Sign in');
-        } else {
-          print('login successfull!');
-          Navigator.pop(context);
-          Navigator.of(context).pushNamedAndRemoveUntil(
-              '/teacher_dashboard', (Route<dynamic> route) => false);
-        }
-      }catch(err){
-        Navigator.pop(context);
-        print(err.message);
-        invalidAuth(err.message);
-      }
+     try{
+       dynamic result =
+       await _auth.registerWithEmailAndPassword(_email, _password);
+       if(result.user.uid == !null){
+         Navigator.of(context).pushNamedAndRemoveUntil(
+             '/teacher_dashboard', (Route<dynamic> route) => false);
+       }else{
+         Navigator.pop(context);
+         invalidAuth("Something went wrong! Please try again!");
+       }
+     } catch(err){
+       Navigator.pop(context);
+       invalidAuth(err.message);
+       print(err.message);
+     }
     }
   }
 }

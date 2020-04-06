@@ -21,7 +21,7 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
             icon: Icon(Icons.exit_to_app),
             onPressed: () async {
               await _auth.signOut();
-//              Navigator.of(context).pushNamedAndRemoveUntil('/teacher_login', (Route<dynamic> route) => false);
+              Navigator.of(context).pushNamedAndRemoveUntil('/teacher_login', (Route<dynamic> route) => false);
             },
           )
         ],

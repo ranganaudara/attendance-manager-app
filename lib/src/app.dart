@@ -1,14 +1,14 @@
-import 'package:attendancemanagerapp/services/auth.dart';
 import 'package:attendancemanagerapp/src/screens/choose_role.dart';
 import 'package:attendancemanagerapp/src/screens/student_dashboard.dart';
 import 'package:attendancemanagerapp/src/screens/student_login.dart';
 import 'package:attendancemanagerapp/src/screens/teacher_dashboard.dart';
 import 'package:attendancemanagerapp/src/screens/teacher_login.dart';
+import 'package:attendancemanagerapp/src/screens/teacher_register.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'models/user.dart';
 
-class Wrapper extends StatelessWidget {
+
+
+class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -38,16 +38,20 @@ class Wrapper extends StatelessWidget {
             fontFamily: 'Hind',
           ),
         ),
+        buttonTheme: ButtonThemeData(
+          minWidth: 0,
+        ),
       ),
       home: Scaffold(
-        body: ChooseRoleView(),
+        body: ChooseRoleScreen(),
       ),
       routes: <String, WidgetBuilder>{
-        '/choose_role': (BuildContext context) => ChooseRoleView(),
-        '/student_login': (BuildContext context) => StudentLoginView(),
+        '/choose_role': (BuildContext context) => ChooseRoleScreen(),
+        '/student_login': (BuildContext context) => StudentLoginScreen(),
         '/student_dashboard': (BuildContext context) => StudentDashboard(),
-        '/teacher_login': (BuildContext context) => TeacherLoginView(),
+        '/teacher_login': (BuildContext context) => TeacherLoginScreen(),
         '/teacher_dashboard': (BuildContext context) => TeacherDashboard(),
+        '/teacher_register': (BuildContext context) => TeacherRegisterScreen(),
 
       },
     );

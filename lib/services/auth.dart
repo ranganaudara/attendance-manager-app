@@ -2,6 +2,7 @@ import 'package:attendancemanagerapp/src/models/user.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class AuthService {
+
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   //create user object
@@ -23,23 +24,48 @@ class AuthService {
       FirebaseUser user = result.user;
       return _userFromFirebase(user);
     } catch (e) {
+      print("Error:");
       print(e.toString());
       return null;
     }
   }
 
 //sign in with email and password
+  Future signInWithEmailAndPassword(String email, String password) async {
+    try {
+      AuthResult result = await _auth.signInWithEmailAndPassword(
+          email: email, password: password);
+//      FirebaseUser user = result.user;
+//      return _userFromFirebase(user);
+    return result;
+    } catch (e) {
+      return Future.error(e);
+    }
+  }
 
-//reg with email and password
+//register with email and password
+  Future registerWithEmailAndPassword(String email, String password) async {
+    try {
+      AuthResult result = await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      print("User>>>:"+result.user.uid);
+//      FirebaseUser user = result.user;
+//      return _userFromFirebase(user);
+    return result;
+    } catch (e) {
+      return Future.error(e);
+    }
+  }
 
 //sign out
-Future signOut() async {
-    try{
+  Future signOut() async {
+    try {
       return await _auth.signOut();
-    } catch(e){
+    } catch (e) {
       print(e.toString());
       return null;
     }
-}
-
+  }
 }
