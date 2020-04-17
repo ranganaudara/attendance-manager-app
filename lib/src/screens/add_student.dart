@@ -3,31 +3,38 @@ import 'package:attendancemanagerapp/services/auth.dart';
 import 'package:attendancemanagerapp/src/mixins/validator_mixin.dart';
 import 'package:attendancemanagerapp/src/widgets/input_field.dart';
 import 'package:attendancemanagerapp/src/widgets/loading.dart';
-import 'package:attendancemanagerapp/src/widgets/logo_thumb.dart';
+import 'package:attendancemanagerapp/src/widgets/popup_message.dart';
 import 'package:attendancemanagerapp/src/widgets/submit_button.dart';
-import 'package:attendancemanagerapp/src/widgets/text_button.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class TeacherRegisterScreen extends StatefulWidget {
+class AddStudentScreen extends StatefulWidget {
   @override
-  _TeacherRegisterScreenState createState() => _TeacherRegisterScreenState();
+  _AddStudentScreenState createState() => _AddStudentScreenState();
 }
 
-class _TeacherRegisterScreenState extends State<TeacherRegisterScreen>
+class _AddStudentScreenState extends State<AddStudentScreen>
     with ValidatorMixin {
   final AuthService _auth = AuthService();
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  String _firstName, _lastName, _email, _subject, _password, err = '';
-  final _passwordFieldKey = GlobalKey<FormFieldState<String>>();
+  String _firstName, _lastName, _indexNum, _email, _subject, err = '', _uid;
+
+  @override
+  void initState() {
+    _getPreferences();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     SizeConfig().init(context);
-
     return Scaffold(
       key: _scaffoldKey,
+      appBar: AppBar(
+        title: Text('Add new student'),
+      ),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -35,13 +42,6 @@ class _TeacherRegisterScreenState extends State<TeacherRegisterScreen>
             key: _formKey,
             child: Column(
               children: <Widget>[
-                SizedBox(height: SizeConfig.screenHeight * 0.1),
-                LogoThumb('assets/images/teacher_login.png'),
-                SizedBox(height: SizeConfig.blockSizeVertical * 3),
-                Text(
-                  'Teacher Registration',
-                  style: Theme.of(context).textTheme.title,
-                ),
                 SizedBox(height: SizeConfig.blockSizeVertical * 5),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -74,6 +74,18 @@ class _TeacherRegisterScreenState extends State<TeacherRegisterScreen>
                 SizedBox(height: SizeConfig.blockSizeVertical * 3),
                 TextInputField(
                   isPassword: false,
+                  labelText: 'Index Number',
+                  onSaved: (input) => _indexNum = input,
+                  validator: (input) {
+                    if (input.isEmpty) {
+                      return 'Index Number cannot be empty!';
+                    }
+                    return null;
+                  },
+                ),
+                SizedBox(height: SizeConfig.blockSizeVertical * 3),
+                TextInputField(
+                  isPassword: false,
                   labelText: 'Subject',
                   onSaved: (input) => _subject = input,
                   validator: (input) {
@@ -92,34 +104,9 @@ class _TeacherRegisterScreenState extends State<TeacherRegisterScreen>
                   validator: emailValidator,
                 ),
                 SizedBox(height: SizeConfig.blockSizeVertical * 3),
-                TextInputField(
-                  isPassword: true,
-                  fieldKey: _passwordFieldKey,
-                  labelText: 'Password',
-                  onSaved: (input) => _password = input,
-                  validator: passwordValidator,
-                ),
-                SizedBox(height: SizeConfig.blockSizeVertical * 3),
                 SubmitButton(
                   title: 'Register',
                   onSubmit: signUp,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    SizedBox(width: SizeConfig.blockSizeHorizontal * 5),
-                    Text(
-                      "Already registered?",
-                      style: Theme.of(context).textTheme.body2,
-                    ),
-                    TextButton(
-                      title: 'Sign in',
-                      onSubmit: () {
-                        Navigator.of(context).pushNamedAndRemoveUntil(
-                            '/teacher_login', (Route<dynamic> route) => false);
-                      },
-                    ),
-                  ],
                 ),
               ],
             ),
@@ -156,22 +143,49 @@ class _TeacherRegisterScreenState extends State<TeacherRegisterScreen>
           builder: (BuildContext context) {
             return Loading();
           });
-     try{
-       dynamic result =
-       await _auth.registerTeacher(email: _email, password: _password, subject: _subject, firstName: _firstName, lastName: _lastName);
-       if(result.user.uid != null){
-         Navigator.of(context).pop();
-         Navigator.of(context).pushNamedAndRemoveUntil(
-             '/teacher_dashboard', (Route<dynamic> route) => false);
-       }else{
-         Navigator.pop(context);
-         invalidAuth("Something went wrong! Please try again!");
-       }
-     } catch(err){
-       Navigator.pop(context);
-       invalidAuth(err.message);
-       print(err.message);
-     }
+      try {
+        dynamic result = await _auth
+            .registerStudent(
+          firstName: _firstName,
+          lastName: _lastName,
+          indexNum: _indexNum,
+          subject: _subject,
+          password: _indexNum,
+          email: _email,
+          teacherUid: _uid,
+        )
+            .then((value) {
+          if (value.user != null) {
+            Navigator.pop(context);
+            showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return PopupMessage(
+                    message: "Successfully added!",
+                    onSubmit: () {
+                      Navigator.pop(context);
+                      _formKey.currentState.reset();
+                    },
+                  );
+                });
+          } else {
+            Navigator.pop(context);
+            invalidAuth("Something went wrong! Please try again!");
+          }
+        });
+      } catch (err) {
+        Navigator.pop(context);
+        invalidAuth(err.message);
+        print(err.message);
+      }
     }
+  }
+
+  _getPreferences() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _uid = prefs.getString("teacherUid");
+    });
+    print(">>>>>>>>>>uid:"+_uid);
   }
 }

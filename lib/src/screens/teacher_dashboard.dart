@@ -26,6 +26,21 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
           )
         ],
       ),
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            RaisedButton(
+              child: Text("Add Student"),
+              onPressed: (){
+                Navigator.of(context).pushNamed('/add_student');
+              },
+            ),
+          ],
+        ),
+      ),
     );
   }
+
 }

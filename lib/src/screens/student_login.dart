@@ -1,5 +1,7 @@
 import 'package:attendancemanagerapp/config/size_config.dart';
+import 'package:attendancemanagerapp/services/auth.dart';
 import 'package:attendancemanagerapp/src/widgets/input_field.dart';
+import 'package:attendancemanagerapp/src/widgets/loading.dart';
 import 'package:attendancemanagerapp/src/widgets/logo_thumb.dart';
 import 'package:attendancemanagerapp/src/widgets/submit_button.dart';
 import 'package:attendancemanagerapp/src/widgets/text_button.dart';
@@ -11,15 +13,26 @@ class StudentLoginScreen extends StatefulWidget {
 }
 
 class _StudentLoginScreenState extends State<StudentLoginScreen> {
+
+  final AuthService _auth = AuthService();
+
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   String _email, _password;
   final _passwordFieldKey = GlobalKey<FormFieldState<String>>();
+  GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
+//  @override
+//  void initState() {
+//    _getPreferences();
+//    super.initState();
+//  }
 
   @override
   Widget build(BuildContext context) {
     SizeConfig().init(context);
 
     return Scaffold(
+      key: _scaffoldKey,
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -83,15 +96,86 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
     );
   }
 
+  void invalidAuth(String msg) {
+    setState(() {
+      _showSnackBar(msg);
+      _formKey.currentState.reset();
+    });
+  }
+
+  _showSnackBar(String msg) {
+    final snackBar = SnackBar(
+      content: Text(
+        msg,
+        style: TextStyle(color: Colors.white),
+      ),
+      duration: Duration(seconds: 3),
+      backgroundColor: Colors.blueGrey,
+    );
+    _scaffoldKey.currentState.showSnackBar(snackBar);
+  }
+
 //  void signIn() async {
 //    if (_formKey.currentState.validate()) {
 //      _formKey.currentState.save();
-//
-//      print("email: $_email, password: $_password");
+//      showDialog(
+//          context: context,
+//          builder: (BuildContext context) {
+//            return Loading();
+//          });
+//      try {
+//        dynamic userData = await _auth.signInWithEmailAndPassword(
+//            _email, _password);
+//        if (userData == null) {
+//          Navigator.pop(context);
+//          invalidAuth('Error Sign in');
+//        } else if(userData.data['role'] != 'student'){
+//          Navigator.pop(context);
+//          invalidAuth("You're not a student!");
+//        } else {
+//          print('login successfull!');
+//          Navigator.of(context).pop();
+//          Navigator.of(context).pushNamedAndRemoveUntil(
+//              '/student_dashboard', (Route<dynamic> route) => false);
+//        }
+//      }catch(err){
+//        Navigator.pop(context);
+//        print(err.message);
+//        invalidAuth(err.message);
+//      }
 //    }
 //  }
-
-  void signIn() {
-    Navigator.of(context).pushNamedAndRemoveUntil('/student_dashboard', (Route<dynamic> route) => false);
+  void signIn() async {
+    if (_formKey.currentState.validate()) {
+      _formKey.currentState.save();
+      showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return Loading();
+          });
+      try {
+        dynamic userData = await _auth.signInWithEmailAndPassword(
+            _email, _password);
+        if (userData == null) {
+          Navigator.pop(context);
+          invalidAuth('Error Sign in');
+        } else if(userData.data['role'] != 'student'){
+          Navigator.pop(context);
+          invalidAuth("This email doesn't have a student account!");
+        } else if(userData.data['role'] == 'student'){
+          print('login successfull!');
+          Navigator.of(context).pop();
+          Navigator.of(context).pushNamedAndRemoveUntil(
+              '/student_dashboard', (Route<dynamic> route) => false);
+        } else {
+          Navigator.pop(context);
+          invalidAuth('Error Sign in');
+        }
+      }catch(err){
+        Navigator.pop(context);
+        print(err.message);
+        invalidAuth(err.message);
+      }
+    }
   }
 }

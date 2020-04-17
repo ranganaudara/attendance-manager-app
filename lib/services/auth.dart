@@ -1,8 +1,8 @@
+import 'package:attendancemanagerapp/services/database.dart';
 import 'package:attendancemanagerapp/src/models/user.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class AuthService {
-
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   //create user object
@@ -17,43 +17,86 @@ class AuthService {
         .map(_userFromFirebase);
   }
 
-  // sign in anonymous
-  Future signInAnon() async {
-    try {
-      AuthResult result = await _auth.signInAnonymously();
-      FirebaseUser user = result.user;
-      return _userFromFirebase(user);
-    } catch (e) {
-      print("Error:");
-      print(e.toString());
-      return null;
-    }
-  }
-
-//sign in with email and password
+//Sign In
   Future signInWithEmailAndPassword(String email, String password) async {
     try {
       AuthResult result = await _auth.signInWithEmailAndPassword(
-          email: email, password: password);
-//      FirebaseUser user = result.user;
-//      return _userFromFirebase(user);
-    return result;
+        email: email,
+        password: password,
+      );
+
+      FirebaseUser user = result.user;
+
+      dynamic userData = await DatabaseService(uid:user.uid).getUserData();
+      return userData;
+
     } catch (e) {
+
       return Future.error(e);
+
     }
   }
 
-//register with email and password
-  Future registerWithEmailAndPassword(String email, String password) async {
+  //Teacher Registration
+  Future registerTeacher({
+    String email,
+    String password,
+    String firstName,
+    String lastName,
+    String subject,
+  }) async {
     try {
       AuthResult result = await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
-      print("User>>>:"+result.user.uid);
+
+      FirebaseUser user = result.user;
+
+      //create new document for the user
+      await DatabaseService(uid:user.uid).updateUserData(
+        firstName: firstName,
+        lastName: lastName,
+        subject: subject,
+        role: 'teacher'
+      );
+      return result;
+    } catch (e) {
+      return Future.error(e);
+    }
+  }
+
+//Student Registration
+  Future registerStudent({
+    String email,
+    String password,
+    String firstName,
+    String lastName,
+    String subject,
+    String indexNum,
+    String teacherUid,
+  }) async {
+    try {
+      AuthResult result = await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      FirebaseUser user = result.user;
+
+      //create new document for the user
+      await DatabaseService(uid:user.uid).updateUserData(
+        firstName: firstName,
+        lastName: lastName,
+        subject: subject,
+        indexNum: indexNum,
+        teacherUid: teacherUid,
+        role:'student'
+      );
+
 //      FirebaseUser user = result.user;
 //      return _userFromFirebase(user);
-    return result;
+      return result;
     } catch (e) {
       return Future.error(e);
     }
@@ -67,5 +110,9 @@ class AuthService {
       print(e.toString());
       return null;
     }
+  }
+
+  Future getTeacherData(String uid) async {
+    DatabaseService(uid: uid).getUserData();
   }
 }

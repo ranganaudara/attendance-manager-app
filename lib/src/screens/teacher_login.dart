@@ -6,6 +6,7 @@ import 'package:attendancemanagerapp/src/widgets/logo_thumb.dart';
 import 'package:attendancemanagerapp/src/widgets/submit_button.dart';
 import 'package:attendancemanagerapp/src/widgets/text_button.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class TeacherLoginScreen extends StatefulWidget {
   @override
@@ -17,8 +18,7 @@ class _TeacherLoginScreenState extends State<TeacherLoginScreen> {
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  String _email, _password, err;
-//  bool isLoading = false;
+  String _email, _password;
   final _passwordFieldKey = GlobalKey<FormFieldState<String>>();
 
   @override
@@ -96,8 +96,7 @@ class _TeacherLoginScreenState extends State<TeacherLoginScreen> {
                 TextButton(
                   title: 'click here',
                   onSubmit: () {
-                    Navigator.of(context).pushNamedAndRemoveUntil(
-                        '/choose_role', (Route<dynamic> route) => false);
+                    Navigator.of(context).pushNamedAndRemoveUntil('/choose_role', (Route<dynamic> route) => false);
                   },
                 ),
               ],
@@ -135,16 +134,20 @@ class _TeacherLoginScreenState extends State<TeacherLoginScreen> {
             return Loading();
           });
       try {
-        dynamic result = await _auth.signInWithEmailAndPassword(
+        dynamic userData = await _auth.signInWithEmailAndPassword(
             _email, _password);
-        if (result == null) {
+        if (userData == null) {
           Navigator.pop(context);
           invalidAuth('Error Sign in');
-        } else {
-          print('login successfull!');
+        } else if(userData.data['role'] != 'teacher'){
           Navigator.pop(context);
-          Navigator.of(context).pushNamedAndRemoveUntil(
-              '/teacher_dashboard', (Route<dynamic> route) => false);
+          invalidAuth("This email doesn't have a teacher's account");
+        } else if(userData.data['role'] == 'teacher'){
+          print('login successfull!');
+          _savePreference(userData.data['uid']);
+        } else {
+          Navigator.pop(context);
+          invalidAuth('Error Sign in');
         }
       }catch(err){
         Navigator.pop(context);
@@ -152,5 +155,15 @@ class _TeacherLoginScreenState extends State<TeacherLoginScreen> {
         invalidAuth(err.message);
       }
     }
+  }
+
+  _savePreference(String uid) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      prefs.setString("teacherUid", uid);
+    });
+    Navigator.of(context).pop();
+    Navigator.of(context).pushNamedAndRemoveUntil(
+        '/teacher_dashboard', (Route<dynamic> route) => false);
   }
 }

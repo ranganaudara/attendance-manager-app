@@ -1,3 +1,4 @@
+import 'package:attendancemanagerapp/src/screens/add_student.dart';
 import 'package:attendancemanagerapp/src/screens/choose_role.dart';
 import 'package:attendancemanagerapp/src/screens/student_dashboard.dart';
 import 'package:attendancemanagerapp/src/screens/student_login.dart';
@@ -52,6 +53,7 @@ class App extends StatelessWidget {
         '/teacher_login': (BuildContext context) => TeacherLoginScreen(),
         '/teacher_dashboard': (BuildContext context) => TeacherDashboard(),
         '/teacher_register': (BuildContext context) => TeacherRegisterScreen(),
+        '/add_student': (BuildContext context) => AddStudentScreen(),
 
       },
     );

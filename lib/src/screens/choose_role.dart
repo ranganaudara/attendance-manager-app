@@ -10,6 +10,7 @@ class ChooseRoleScreen extends StatefulWidget {
 }
 
 class _ChooseRoleScreenState extends State<ChooseRoleScreen> {
+
   @override
   Widget build(BuildContext context) {
     final user = Provider.of<User>(context);
@@ -34,6 +35,7 @@ class _ChooseRoleScreenState extends State<ChooseRoleScreen> {
                   if (user == null) {
                         Navigator.popAndPushNamed(context, '/student_login');
                   } else {
+                    Navigator.of(context).pop();
                     Navigator.of(context).pushNamedAndRemoveUntil(
                         '/student_dashboard', (Route<dynamic> route) => false);
                   }
