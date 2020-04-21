@@ -9,19 +9,17 @@ class DatabaseService {
       Firestore.instance.collection('users');
 
   final CollectionReference attendanceCollection =
-    Firestore.instance.collection('attendance');
+      Firestore.instance.collection('attendance');
 
-
-  Future updateUserData({
-    String firstName,
-    String lastName,
-    String subject,
-    String indexNum,
-    String teacherUid,
-    String studentUid,
-    String role
-  }) async {
-    if(role == 'teacher'){
+  Future updateUserData(
+      {String firstName,
+      String lastName,
+      String subject,
+      String indexNum,
+      String teacherUid,
+      String studentUid,
+      String role}) async {
+    if (role == 'teacher') {
       return await userCollection.document(uid).setData({
         'uid': uid,
         'firstName': firstName,
@@ -31,6 +29,7 @@ class DatabaseService {
       });
     } else {
       return await userCollection.document(uid).setData({
+        'attendance': 0,
         'uid': uid,
         'firstName': firstName,
         'lastName': lastName,
@@ -47,5 +46,21 @@ class DatabaseService {
     print("getUserData called!");
     return userData;
 //    print("Role of user>>>>>>>>>>>>>>>>>>>>"+userData.data['role']);
+  }
+
+  Future updateAttendanceData({
+    String date,
+    String time,
+    String index,
+    String teacherUid,
+    String studentUid,
+  }) async {
+    return await attendanceCollection.document().setData({
+      'date': date,
+      'time': time,
+      'index': index,
+      'teacherUid': teacherUid,
+      'studentUid': studentUid
+    });
   }
 }

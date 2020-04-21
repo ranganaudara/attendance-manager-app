@@ -67,6 +67,12 @@ class _AddStudentScreenState extends State<AddStudentScreen>
                         isPassword: false,
                         labelText: 'Last Name',
                         onSaved: (input) => _lastName = input,
+                        validator: (input) {
+                          if (input.isEmpty) {
+                            return 'Enter last name!';
+                          }
+                          return null;
+                        },
                       ),
                     ),
                   ],
@@ -186,6 +192,5 @@ class _AddStudentScreenState extends State<AddStudentScreen>
     setState(() {
       _uid = prefs.getString("teacherUid");
     });
-    print(">>>>>>>>>>uid:"+_uid);
   }
 }

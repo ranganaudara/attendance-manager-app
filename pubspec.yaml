@@ -17,13 +17,27 @@ dependencies:
   shared_preferences: ^0.5.6+3
   qr_flutter: ^3.2.0
   intl: ^0.16.1
+  barcode_scan:
+  flutter_launcher_icons: ^0.7.4
+
 
 dev_dependencies:
+  flutter_launcher_name: "^0.0.1"
   flutter_test:
     sdk: flutter
+
+flutter_launcher_name:
+  name: "Attendance App"
+
+flutter_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/images/graduate.png"
 
 flutter:
   uses-material-design: true
   assets:
     - assets/images/student_login.png
     - assets/images/teacher_login.png
+    - assets/images/user.png
+    - assets/images/graduate.png

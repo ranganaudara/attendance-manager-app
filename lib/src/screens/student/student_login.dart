@@ -6,6 +6,7 @@ import 'package:attendancemanagerapp/src/widgets/logo_thumb.dart';
 import 'package:attendancemanagerapp/src/widgets/submit_button.dart';
 import 'package:attendancemanagerapp/src/widgets/text_button.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class StudentLoginScreen extends StatefulWidget {
   @override
@@ -20,12 +21,6 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
   String _email, _password;
   final _passwordFieldKey = GlobalKey<FormFieldState<String>>();
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-
-//  @override
-//  void initState() {
-//    _getPreferences();
-//    super.initState();
-//  }
 
   @override
   Widget build(BuildContext context) {
@@ -115,36 +110,6 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
     _scaffoldKey.currentState.showSnackBar(snackBar);
   }
 
-//  void signIn() async {
-//    if (_formKey.currentState.validate()) {
-//      _formKey.currentState.save();
-//      showDialog(
-//          context: context,
-//          builder: (BuildContext context) {
-//            return Loading();
-//          });
-//      try {
-//        dynamic userData = await _auth.signInWithEmailAndPassword(
-//            _email, _password);
-//        if (userData == null) {
-//          Navigator.pop(context);
-//          invalidAuth('Error Sign in');
-//        } else if(userData.data['role'] != 'student'){
-//          Navigator.pop(context);
-//          invalidAuth("You're not a student!");
-//        } else {
-//          print('login successfull!');
-//          Navigator.of(context).pop();
-//          Navigator.of(context).pushNamedAndRemoveUntil(
-//              '/student_dashboard', (Route<dynamic> route) => false);
-//        }
-//      }catch(err){
-//        Navigator.pop(context);
-//        print(err.message);
-//        invalidAuth(err.message);
-//      }
-//    }
-//  }
   void signIn() async {
     if (_formKey.currentState.validate()) {
       _formKey.currentState.save();
@@ -164,9 +129,7 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
           invalidAuth("This email doesn't have a student account!");
         } else if(userData.data['role'] == 'student'){
           print('login successfull!');
-          Navigator.of(context).pop();
-          Navigator.of(context).pushNamedAndRemoveUntil(
-              '/student_dashboard', (Route<dynamic> route) => false);
+          _savePreference(userData.data['uid']);
         } else {
           Navigator.pop(context);
           invalidAuth('Error Sign in');
@@ -177,5 +140,15 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
         invalidAuth(err.message);
       }
     }
+  }
+
+  _savePreference(String uid) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      prefs.setString("studentUid", uid);
+    });
+    Navigator.of(context).pop();
+    Navigator.of(context).pushNamedAndRemoveUntil(
+        '/student_dashboard', (Route<dynamic> route) => false);
   }
 }
