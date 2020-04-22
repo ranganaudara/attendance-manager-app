@@ -9,6 +9,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:barcode_scan/barcode_scan.dart';
 import 'package:flutter/services.dart';
 
+import 'number_of_days_tab.dart';
+import 'percentage_tab.dart';
+
 class TeacherDashboard extends StatefulWidget {
   @override
   _TeacherDashboardState createState() => _TeacherDashboardState();
@@ -30,80 +33,65 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      drawer: CustomDrawer(
-        name: "Welcome!",
-        addStudent: () {
-          Navigator.of(context).pushNamed('/add_student');
-        },
-        logOut: () async {
-          await _auth.signOut();
-          Navigator.of(context).pushNamedAndRemoveUntil(
-              '/teacher_login', (Route<dynamic> route) => false);
-        },
-      ),
-      appBar: AppBar(
-        title: Center(
-          child: Text('Attendance Manager',
-              style: Theme.of(context).textTheme.subtitle),
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        drawer: CustomDrawer(
+          name: "Welcome!",
+          addStudent: () {
+            Navigator.of(context).pushNamed('/add_student');
+          },
+          logOut: () async {
+            await _auth.signOut();
+            Navigator.of(context).pushNamedAndRemoveUntil(
+                '/teacher_login', (Route<dynamic> route) => false);
+          },
         ),
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.exit_to_app),
-            onPressed: () async {
-              await _auth.signOut();
-              Navigator.of(context).pushNamedAndRemoveUntil(
-                  '/teacher_login', (Route<dynamic> route) => false);
-            },
-          )
-        ],
-      ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: Firestore.instance
-            .collection('users')
-            .where("teacherUid", isEqualTo: _uid)
-            .snapshots(),
-        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-          if (snapshot.hasError) return new Text('Error: ${snapshot.error}');
-          switch (snapshot.connectionState) {
-            case ConnectionState.waiting:
-              return Loading();
-            default:
-              return ListView(
-                children:
-                    snapshot.data.documents.map((DocumentSnapshot document) {
-                  return Card(
-                    child: ListTile(
-                      leading: CircleAvatar(
-                        child:
-                            Image(image: AssetImage('assets/images/user.png')),
-                        maxRadius: 20.0,
-                        minRadius: 5.0,
-                        backgroundColor: Colors.transparent,
-                      ),
-                      title: Text(document.data['firstName'] +
-                          " " +
-                          document.data['lastName']),
-                      subtitle: Text(document.data['indexNum']),
-                      trailing: Text(document.data['attendance'].toString()),
-                    ),
-                  );
-                }).toList(),
-              );
-          }
-        },
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        icon: Icon(Icons.camera_alt),
-        label: Text('Scan'),
-        onPressed: () async {
-          _scanQR();
-//          updateAttendance('wRaVBTaRLVMBUsedUjh53Uj7YD63');
-//          getUser(_uid);
-        },
+        appBar: AppBar(
+          title: Center(
+            child: Text('Attendance Manager',
+                style: Theme.of(context).textTheme.subtitle),
+          ),
+          actions: <Widget>[
+            IconButton(
+              icon: Icon(Icons.exit_to_app),
+              onPressed: () async {
+                await _auth.signOut();
+                Navigator.of(context).pushNamedAndRemoveUntil(
+                    '/teacher_login', (Route<dynamic> route) => false);
+              },
+            )
+          ],
+          bottom: TabBar(
+            tabs: <Widget>[
+              Tab(
+                icon: Icon(Icons.today),
+                text: 'Number of Days',
+              ),
+              Tab(
+                icon: Icon(Icons.timeline),
+                text: 'Percentage',
+              ),
+            ],
+          ),
+        ),
+        body: TabBarView(
+          children: <Widget>[
+            numberOfDays(_uid),
+            PercentageTab(studentList,_uid)
+          ],
+        ),
+        floatingActionButton: FloatingActionButton.extended(
+          icon: Icon(Icons.camera_alt),
+          label: Text('Scan'),
+          onPressed: () async {
+            _scanQR();
+          },
+        ),
       ),
     );
   }
+
 
   Future<String> _scanQR() async {
     try {

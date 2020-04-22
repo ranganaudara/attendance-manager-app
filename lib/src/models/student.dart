@@ -30,4 +30,8 @@ class Student {
     this.attendance = parsedDoc['attendance'];
 
   }
+
+  int getAttendance(){
+    return this.attendance;
+  }
 }
