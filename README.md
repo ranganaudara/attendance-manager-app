@@ -9,5 +9,5 @@ This application helps teachers to mark their students attendance with QR Code s
 03. flutter packages pub run flutter_launcher_icons:main
 04. flutter packages pub run flutter_launcher_name:main
 
-Then your good to go... 
+Then you're good to go... 
 Happy Coding...! ❤️
