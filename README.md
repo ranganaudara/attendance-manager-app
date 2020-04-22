@@ -1,16 +1,13 @@
 # attendancemanagerapp
 
-A new Flutter application.
+This application helps teachers to mark their students attendance with QR Code scanning.
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+01. Clone the application
+02. run flutter packages get
+03. flutter packages pub run flutter_launcher_icons:main
+04. flutter packages pub run flutter_launcher_name:main
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
-
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Then your good to go... 
+Happy Coding...! ❤️
