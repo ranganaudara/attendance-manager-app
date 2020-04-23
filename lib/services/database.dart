@@ -8,8 +8,8 @@ class DatabaseService {
   final CollectionReference userCollection =
       Firestore.instance.collection('users');
 
-  final CollectionReference attendanceCollection =
-      Firestore.instance.collection('attendance');
+  final CollectionReference classesCollection =
+  Firestore.instance.collection('classes');
 
   Future updateUserData(
       {String firstName,
@@ -48,19 +48,9 @@ class DatabaseService {
 //    print("Role of user>>>>>>>>>>>>>>>>>>>>"+userData.data['role']);
   }
 
-  Future updateAttendanceData({
-    String date,
-    String time,
-    String index,
-    String teacherUid,
-    String studentUid,
-  }) async {
-    return await attendanceCollection.document().setData({
-      'date': date,
-      'time': time,
-      'index': index,
-      'teacherUid': teacherUid,
-      'studentUid': studentUid
+  Future createClass() async {
+    return await classesCollection.document(uid).setData({
+      'classDays': 0
     });
   }
 }

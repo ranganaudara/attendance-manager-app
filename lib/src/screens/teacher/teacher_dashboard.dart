@@ -1,14 +1,11 @@
 import 'package:attendancemanagerapp/services/auth.dart';
 import 'package:attendancemanagerapp/src/models/student.dart';
 import 'package:attendancemanagerapp/src/widgets/custom_drawer.dart';
-import 'package:attendancemanagerapp/src/widgets/loading.dart';
-import 'package:attendancemanagerapp/src/widgets/popup_message.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:barcode_scan/barcode_scan.dart';
-import 'package:flutter/services.dart';
 
+import 'new_class.dart';
 import 'number_of_days_tab.dart';
 import 'percentage_tab.dart';
 
@@ -27,7 +24,6 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
   @override
   void initState() {
     _getPreferences();
-    getUser(_uid);
     super.initState();
   }
 
@@ -78,95 +74,34 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
         body: TabBarView(
           children: <Widget>[
             numberOfDays(_uid),
-            PercentageTab(studentList,_uid)
+            PercentageTab(_uid)
           ],
         ),
         floatingActionButton: FloatingActionButton.extended(
-          icon: Icon(Icons.camera_alt),
-          label: Text('Scan'),
-          onPressed: () async {
-            _scanQR();
+          icon: Icon(Icons.add),
+          label: Text('Add Class'),
+          onPressed: () {
+            updateClassData(_uid);
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => NewClass(_uid),
+              ),
+            );
           },
         ),
       ),
     );
   }
 
-
-  Future<String> _scanQR() async {
-    try {
-      ScanResult qrResult = await BarcodeScanner.scan();
-      setState(() {
-        result = qrResult.rawContent;
-      });
-    } on PlatformException catch (e) {
-      if (e.code == BarcodeScanner.cameraAccessDenied) {
-        setState(() {
-          result = "Camera permission denied!";
-        });
-      } else {
-        setState(() {
-          result = "Uknown Error: $e";
-        });
-      }
-    } on FormatException {
-      setState(() {
-        result = "QR Code scan incomplete!";
-      });
-    } catch (e) {
-      setState(() {
-        result = "Uknown Error: $e";
-      });
-    }
-    _checkQRContent();
-  }
-
-  _checkQRContent() {
-    List<String> parsedQRData = result.split(',');
-    if (parsedQRData[0] == 'success') {
-      date = parsedQRData[1];
-      time = parsedQRData[2];
-      studentUid = parsedQRData[3];
-      updateAttendance(studentUid);
-    } else {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return PopupMessage(
-            message: "Invalid QR Code!",
-            onSubmit: () {
-              Navigator.pop(context);
-            },
-          );
-        },
-      );
-    }
-  }
-
-  Future getUser(String uid) async {
-    Firestore.instance
-        .collection('users')
-        .where("teacherUid", isEqualTo: uid)
-        .snapshots()
-        .listen(
-          (data) => data.documents.forEach(
-            (doc) {
-              print(data.documents.length);
-              Student student = Student.fromDocument(doc);
-              studentList.add(student);
-            },
-          ),
-        );
-  }
-
-  Future updateAttendance(String uid) async {
+  Future updateClassData(String teacherUid) async {
     final DocumentReference studentRef =
-        Firestore.instance.document('users/$uid');
+    Firestore.instance.document('classes/$teacherUid');
     Firestore.instance.runTransaction((Transaction tx) async {
       DocumentSnapshot postSnapshot = await tx.get(studentRef);
       if (postSnapshot.exists) {
         await tx.update(studentRef, <String, dynamic>{
-          'attendance': postSnapshot.data['attendance'] + 1
+          'classDays': postSnapshot.data['classDays'] + 1
         });
       }
     });

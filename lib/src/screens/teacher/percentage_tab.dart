@@ -1,12 +1,9 @@
-import 'package:attendancemanagerapp/src/models/student.dart';
 import 'package:attendancemanagerapp/src/widgets/loading.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-
 class PercentageTab extends StatefulWidget {
-  PercentageTab(this.studentList,this._uid);
-  final List<Student> studentList;
+  PercentageTab(this._uid);
   final String _uid;
 
   @override
@@ -14,16 +11,15 @@ class PercentageTab extends StatefulWidget {
 }
 
 class _PercentageTabState extends State<PercentageTab> {
+  int totalClassDays = -1;
+  @override
+  void initState() {
+    getTotalCLasses(widget._uid);
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
-    List<Student> st = widget.studentList;
-    List attendance  = [];
-    st.forEach((s){
-      s.attendance != null?
-      attendance.add(s.attendance):attendance.add(0) ;
-    });
-    var largestValue = attendance.reduce((current, next) => current > next ? current : next);
-
     return StreamBuilder<QuerySnapshot>(
       stream: Firestore.instance
           .collection('users')
@@ -37,7 +33,7 @@ class _PercentageTabState extends State<PercentageTab> {
           default:
             return ListView(
               children:
-              snapshot.data.documents.map((DocumentSnapshot document) {
+                  snapshot.data.documents.map((DocumentSnapshot document) {
                 return Card(
                   child: ListTile(
                     leading: CircleAvatar(
@@ -50,7 +46,8 @@ class _PercentageTabState extends State<PercentageTab> {
                         " " +
                         document.data['lastName']),
                     subtitle: Text(document.data['indexNum']),
-                    trailing: Text(((document.data['attendance']*100/largestValue).round()).toString()+"%"),
+                    trailing: Text(
+                        totalClassDays == -1 ? " " : ((document.data['attendance'] * 100 / totalClassDays).round()).toString() + "%"),
                   ),
                 );
               }).toList(),
@@ -58,5 +55,18 @@ class _PercentageTabState extends State<PercentageTab> {
         }
       },
     );
+  }
+
+  getTotalCLasses(String teacherUid) {
+    Firestore.instance
+        .collection('classes')
+        .document(teacherUid)
+        .get()
+        .then((DocumentSnapshot ds) {
+      // use ds as a snapshot
+      setState(() {
+        totalClassDays = ds["classDays"];
+      });
+    });
   }
 }

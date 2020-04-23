@@ -2,6 +2,7 @@ import 'package:attendancemanagerapp/src/screens/teacher/add_student.dart';
 import 'package:attendancemanagerapp/src/screens/choose_role.dart';
 import 'package:attendancemanagerapp/src/screens/student/student_dashboard.dart';
 import 'package:attendancemanagerapp/src/screens/student/student_login.dart';
+import 'package:attendancemanagerapp/src/screens/teacher/new_class.dart';
 import 'package:attendancemanagerapp/src/screens/teacher/teacher_dashboard.dart';
 import 'package:attendancemanagerapp/src/screens/teacher/teacher_login.dart';
 import 'package:attendancemanagerapp/src/screens/teacher/teacher_register.dart';

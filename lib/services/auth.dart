@@ -60,6 +60,10 @@ class AuthService {
         subject: subject,
         role: 'teacher'
       );
+
+      //create new class for teacher
+      await DatabaseService(uid:user.uid).createClass();
+
       return result;
     } catch (e) {
       return Future.error(e);
